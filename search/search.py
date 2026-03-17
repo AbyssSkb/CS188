@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -68,9 +69,11 @@ def tinyMazeSearch(problem):
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
     from game import Directions
+
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem: SearchProblem):
     """
@@ -87,17 +90,62 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack = util.Stack()
+    stack.push((problem.getStartState(), []))
+    visited_state = {}
+    while not stack.isEmpty():
+        state, actions = stack.pop()
+        if state in visited_state:
+            continue
+        visited_state[state] = True
+        if problem.isGoalState(state):
+            return actions
+        successors = problem.getSuccessors(state)
+        for successor, action, _ in successors:
+            new_actions = actions.copy()
+            new_actions.append(action)
+            stack.push((successor, new_actions))
+
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.Queue()
+    queue.push((problem.getStartState(), []))
+    visited_state = {}
+    while not queue.isEmpty():
+        state, actions = queue.pop()
+        if state in visited_state:
+            continue
+        visited_state[state] = True
+        if problem.isGoalState(state):
+            return actions
+        successors = problem.getSuccessors(state)
+        for successor, action, _ in successors:
+            new_actions = actions.copy()
+            new_actions.append(action)
+            queue.push((successor, new_actions))
+
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.PriorityQueueWithFunction(lambda item: item[2])
+    queue.push((problem.getStartState(), [], 0))
+    visited_state = {}
+    while not queue.isEmpty():
+        state, actions, all_cost = queue.pop()
+        if state in visited_state:
+            continue
+        visited_state[state] = True
+        if problem.isGoalState(state):
+            return actions
+        successors = problem.getSuccessors(state)
+        for successor, action, cost in successors:
+            new_actions = actions.copy()
+            new_actions.append(action)
+            queue.push((successor, new_actions, all_cost + cost))
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +154,33 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.PriorityQueueWithFunction(lambda item: item[3])
+    start_state = problem.getStartState()
+    queue.push((start_state, [], 0, heuristic(start_state, problem)))
+    visited_state = {}
+    while not queue.isEmpty():
+        state, actions, current_cost, _ = queue.pop()
+        if state in visited_state:
+            continue
+        visited_state[state] = True
+        if problem.isGoalState(state):
+            return actions
+        successors = problem.getSuccessors(state)
+        for successor, action, cost in successors:
+            new_actions = actions.copy()
+            new_actions.append(action)
+            queue.push(
+                (
+                    successor,
+                    new_actions,
+                    current_cost + cost,
+                    current_cost + cost + heuristic(successor, problem),
+                )
+            )
 
 
 # Abbreviations
